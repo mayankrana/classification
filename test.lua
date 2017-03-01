@@ -3,6 +3,7 @@ testLogger = optim.Logger(paths.concat(opt.save, 'test.log'))
 local batchNumber
 local top1_center, loss
 local timer = torch.Timer()
+local confusionMatrix
 testAcc = 0.0
 
 function test()
@@ -10,6 +11,7 @@ function test()
    print("==> online epoch # " .. epoch)
 
    batchNumber = 0
+   confusionMatrix = torch.zeros(nClasses, nClasses)
    cutorch.synchronize()
    timer:reset()
 
@@ -47,6 +49,11 @@ function test()
                        epoch, timer:time().real, loss, top1_center))
 
    print('\n')
+   --print confusion matrix
+   print('CONFUSION MATRIX')
+   print(classes)
+   print(confusionMatrix)
+
 end -- of test()
 -----------------------------------------------------------------------------
 local inputs = torch.CudaTensor()
@@ -69,6 +76,7 @@ function testBatch(inputsCPU, labelsCPU)
    for i=1,pred:size(1) do
       local g = labelsCPU[i]
       if pred_sorted[i][1] == g then top1_center = top1_center + 1 end
+      confusionMatrix[pred_sorted[i][1]][g] = confusionMatrix[pred_sorted[i][1]][g] + 1
    end
    if batchNumber % 1024 == 0 then
       print(('Epoch: Testing [%d][%d/%d]'):format(epoch, batchNumber, nTest))

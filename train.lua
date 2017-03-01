@@ -3,7 +3,7 @@ require 'optim'
 -- Setup a reused optimization state (for sgd). If needed, reload it from disk
 optimState = {
     learningRate = opt.LR,
-    learningRateDecay = opt.decay,
+    learningRateDecay = 0,--opt.decay,
     momentum = opt.momentum,
     dampening = 0.0,
     weightDecay = opt.weightDecay
@@ -31,12 +31,18 @@ local function paramsForEpoch(epoch)
         return { }
     end
     local regimes = {
-        -- start, end,    LR,   WD,
-        {  1,     18,   1e-2,   5e-4, },
-        { 19,     29,   5e-3,   5e-4  },
-        { 30,     43,   1e-3,   0 },
-        { 44,     52,   5e-4,   0 },
-        { 53,    1e8,   1e-4,   0 },
+       -- start, end,    LR,   WD,
+       {  1,      5,    1e-2,  5e-4 },
+        { 6,     10,    5e-3,  5e-4 },
+        { 11,     40,   1e-4,   0 },
+        { 41,     52,   5e-4,   0 },
+        { 53,    1e8,   1e-6,   0 },
+
+        -- {  1,     18,   1e-2,   5e-4, },
+        -- { 19,     29,   5e-3,   5e-4  },
+        -- { 30,     43,   1e-3,   0 },
+        -- { 44,     52,   5e-4,   0 },
+        -- { 53,    1e8,   1e-4,   0 },
     }
 
     for _, row in ipairs(regimes) do
@@ -66,6 +72,12 @@ function train()
          dampening = 0.0,
          weightDecay = params.weightDecay
       }
+      print(optimState)
+   else
+      if(epoch%opt.learningRateStep == 0 and opt.decay ~= 0) then
+         optimState.learningRate = optimState.learningRate*opt.decay
+         print(optimState)
+      end
    end
    batchNumber = 0
    cutorch.synchronize()

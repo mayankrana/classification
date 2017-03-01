@@ -3,7 +3,7 @@ torch.setdefaulttensortype('torch.FloatTensor')
 
 dataAugmentationOpt = {
    lcn = true,
-   hflip = false,
+   hflip = true,
    vflip = false,
    rotate = false,
    random_crop = true --always true for now
