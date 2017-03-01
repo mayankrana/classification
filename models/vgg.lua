@@ -1,6 +1,7 @@
 function createModel(nGPU)
 
    local cfg = {64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'}
+   --out_width  = floor((in_width  + 2*padding - kW) / dW + 1)
 
    local features = nn.Sequential()
    local inChannels = 3
@@ -21,6 +22,7 @@ function createModel(nGPU)
    classifier:add(nn.View(512))
    classifier:add(nn.Linear(512, 512))
    classifier:add(nn.Threshold(0,1e-6))
+   classifier:add(nn.BatchNormalization(512, 1e-3))
    classifier:add(nn.Dropout(0.5))
    classifier:add(nn.Linear(512, nClasses))
    classifier:add(nn.Threshold(0,1e-6))
